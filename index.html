@@ -19,7 +19,7 @@
         li.cottage-item.active { background-color: #e0f0ff; font-weight: bold; color: #0056b3; border-left: 4px solid #007bff; padding-left: 11px; }
         #map-container { flex-grow: 1; height: 100%; display: flex; flex-direction: column; }
         #map-frame { flex-grow: 1; border: none; }
-        #info-box { padding: 15px; background-color: #fff; border-top: 1px solid #ddd; box-sizing: border-box; flex-shrink: 0; }
+        #info-box { padding: 15px; background-color: #fff; border-top: 1px solid #ddd; box-sizing: border-box; }
         #info-box h2 { font-size: 1.2em; border: none; padding: 0; margin: 0 0 10px 0; }
         #info-box p { margin: 8px 0; font-size: 0.9em; }
         #info-box strong { color: #555; min-width: 110px; display: inline-block; }
@@ -33,37 +33,49 @@
 
         /* ▼▼▼ スマートフォン対応スタイル ▼▼▼ */
         @media (max-width: 768px) {
-            body { flex-direction: column; overflow: hidden; height: 100vh; } /* 変更点: 親要素のスクロールを完全に禁止 */
-            #toggle-list-pc { display: none; }
+            body { 
+                flex-direction: column; 
+                height: 100vh; /* 画面の高さいっぱいに */
+                overflow: hidden; /* スクロールを禁止 */
+            }
+            #toggle-list-pc { display: none; } /* PC用ボタンを隠す */
             
             #map-container { 
                 order: 1; 
-                flex-grow: 1; 
-                height: 0; /* 変更点: flex-growを正しく機能させるための調整 */
-                min-height: 200px; /* 変更点: 地図が消えないように最小高さを設定 */
+                height: 100%; /* 高さいっぱいに */
+                /* ★★★ ここが重要 ★★★ */
+                /* 画面下部に固定されるリストヘッダー分のスペース(60px)を確保します */
+                padding-bottom: var(--header-height); 
+                box-sizing: border-box; /* paddingを含めて高さを100%に */
+            }
+            
+            #info-box { 
+                flex-shrink: 0; /* 情報欄は縮まないように */
+                overflow-y: auto; /* 内容が多い場合にスクロール可能に */
             }
             
             #list-container {
                 order: 2;
+                position: fixed; /* 画面下部に固定（これが正しい挙動でした） */
+                bottom: 0;
+                left: 0;
                 width: 100%;
                 max-width: none;
                 height: auto;
-                max-height: 90vh; /* 変更点: 画面の90%まで広がるように */
+                max-height: 80vh; /* 最大でも画面の80%まで */
+                background-color: white;
+                box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
                 border-right: none;
-                flex-shrink: 0; /* 変更点: コンテナが縮まないように */
+                /* デフォルトではヘッダー部分だけ見えるように、下に隠しておく */
+                transform: translateY(calc(100% - var(--header-height))); 
+                transition: transform 0.3s ease-in-out;
             }
             
-            #cottage-list {
-                max-height: 0; /* 変更点: リストをデフォルトで非表示に */
-                overflow: hidden;
-                transition: max-height 0.3s ease-in-out;
+            #list-container.open {
+                transform: translateY(0); /* .openクラスがついたら完全に表示 */
             }
 
-            #list-container.open #cottage-list {
-                max-height: 50vh; /* 変更点: openクラスがついたらリストを表示 */
-                border-top: 1px solid #ddd;
-            }
-
+            #list-header { background-color: white; border-bottom: 1px solid #ddd; }
             #list-header h1 { font-size: 1.2em; }
             #toggle-list-mobile { display: block; padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 5px; font-size: 0.9em; }
         }
@@ -97,68 +109,4 @@
     <div id="map-container">
         <iframe id="map-frame" src="" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
         <div id="info-box">
-            <h2 id="info-name"></h2>
-            <p><strong>富士急からの距離:</strong> <span id="info-distance"></span></p>
-            <p><strong>ロケーション:</strong> <span id="info-location"></span></p>
-            <p><strong>価格帯の目安:</strong> <span id="info-price"></span></p>
-            <p><strong>リンク:</strong> <a id="info-link" href="#" target="_blank" rel="noopener noreferrer"></a></p>
-        </div>
-    </div>
-
-    <script>
-        // 要素を取得
-        const listContainer = document.getElementById('list-container');
-        const cottageList = document.getElementById('cottage-list');
-        const mapFrame = document.getElementById('map-frame');
-        const infoName = document.getElementById('info-name');
-        const infoDistance = document.getElementById('info-distance');
-        const infoLocation = document.getElementById('info-location');
-        const infoPrice = document.getElementById('info-price');
-        const infoLink = document.getElementById('info-link');
-        const toggleBtnPc = document.getElementById('toggle-list-pc');
-        const toggleBtnMobile = document.getElementById('toggle-list-mobile');
-
-        // 情報更新を行う関数
-        function updateInfo(item) {
-            if (!item) return;
-            document.querySelectorAll('.cottage-item').forEach(el => el.classList.remove('active'));
-            item.classList.add('active');
-            mapFrame.src = item.dataset.mapSrc;
-            infoName.textContent = item.textContent.trim();
-            infoDistance.textContent = item.dataset.distance;
-            infoLocation.textContent = item.dataset.location;
-            infoPrice.textContent = item.dataset.price;
-            infoLink.href = item.dataset.link;
-            infoLink.textContent = "公式サイト・予約サイトを開く";
-        }
-
-        // 初期表示
-        const initialItem = cottageList.querySelector('.cottage-item');
-        updateInfo(initialItem);
-
-        // PC用ボタンのイベント
-        toggleBtnPc.addEventListener('click', () => {
-            listContainer.classList.toggle('collapsed');
-            toggleBtnPc.textContent = listContainer.classList.contains('collapsed') ? '表示' : '隠す';
-        });
-
-        // スマホ用ボタンのイベント
-        toggleBtnMobile.addEventListener('click', () => {
-            listContainer.classList.toggle('open');
-            toggleBtnMobile.textContent = listContainer.classList.contains('open') ? 'リストを隠す' : '候補リストを表示';
-        });
-
-        // リスト項目クリック時のイベント
-        cottageList.addEventListener('click', function(e) {
-            const item = e.target.closest('.cottage-item');
-            updateInfo(item);
-            // スマホ表示の時、項目を選んだらリストを自動で閉じる
-            if (window.innerWidth <= 768) {
-                listContainer.classList.remove('open');
-                toggleBtnMobile.textContent = '候補リストを表示';
-            }
-        });
-    </script>
-
-</body>
-</html>
+            <h2
