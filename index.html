@@ -34,45 +34,43 @@
         /* ▼▼▼ スマートフォン対応スタイル ▼▼▼ */
         @media (max-width: 768px) {
             body { 
-                flex-direction: column; 
-                height: 100vh; /* 画面の高さいっぱいに */
-                overflow: hidden; /* スクロールを禁止 */
+                height: 100vh;
+                overflow: hidden;
             }
-            #toggle-list-pc { display: none; } /* PC用ボタンを隠す */
+            #toggle-list-pc { display: none; }
             
             #map-container { 
-                order: 1; 
-                height: 100%; /* 高さいっぱいに */
-                /* ★★★ ここが重要 ★★★ */
-                /* 画面下部に固定されるリストヘッダー分のスペース(60px)を確保します */
+                width: 100%; /* 横幅を100%に */
+                /* ★★★ 修正点 ★★★ */
+                /* 矛盾していたorder指定を削除 */
                 padding-bottom: var(--header-height); 
-                box-sizing: border-box; /* paddingを含めて高さを100%に */
+                box-sizing: border-box;
             }
             
             #info-box { 
-                flex-shrink: 0; /* 情報欄は縮まないように */
-                overflow-y: auto; /* 内容が多い場合にスクロール可能に */
+                flex-shrink: 0;
+                overflow-y: auto;
             }
             
             #list-container {
-                order: 2;
-                position: fixed; /* 画面下部に固定（これが正しい挙動でした） */
+                /* ★★★ 修正点 ★★★ */
+                /* 矛盾していたorder指定を削除 */
+                position: fixed;
                 bottom: 0;
                 left: 0;
                 width: 100%;
                 max-width: none;
                 height: auto;
-                max-height: 80vh; /* 最大でも画面の80%まで */
+                max-height: 80vh;
                 background-color: white;
                 box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
                 border-right: none;
-                /* デフォルトではヘッダー部分だけ見えるように、下に隠しておく */
                 transform: translateY(calc(100% - var(--header-height))); 
                 transition: transform 0.3s ease-in-out;
             }
             
             #list-container.open {
-                transform: translateY(0); /* .openクラスがついたら完全に表示 */
+                transform: translateY(0);
             }
 
             #list-header { background-color: white; border-bottom: 1px solid #ddd; }
@@ -109,4 +107,61 @@
     <div id="map-container">
         <iframe id="map-frame" src="" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
         <div id="info-box">
-            <h2
+            <h2 id="info-name"></h2>
+            <p><strong>富士急からの距離:</strong> <span id="info-distance"></span></p>
+            <p><strong>ロケーション:</strong> <span id="info-location"></span></p>
+            <p><strong>価格帯の目安:</strong> <span id="info-price"></span></p>
+            <p><strong>リンク:</strong> <a id="info-link" href="#" target="_blank" rel="noopener noreferrer"></a></p>
+        </div>
+    </div>
+
+    <script>
+        const listContainer = document.getElementById('list-container');
+        const cottageList = document.getElementById('cottage-list');
+        const mapFrame = document.getElementById('map-frame');
+        const infoName = document.getElementById('info-name');
+        const infoDistance = document.getElementById('info-distance');
+        const infoLocation = document.getElementById('info-location');
+        const infoPrice = document.getElementById('info-price');
+        const infoLink = document.getElementById('info-link');
+        const toggleBtnPc = document.getElementById('toggle-list-pc');
+        const toggleBtnMobile = document.getElementById('toggle-list-mobile');
+
+        function updateInfo(item) {
+            if (!item) return;
+            document.querySelectorAll('.cottage-item').forEach(el => el.classList.remove('active'));
+            item.classList.add('active');
+            mapFrame.src = item.dataset.mapSrc;
+            infoName.textContent = item.textContent.trim();
+            infoDistance.textContent = item.dataset.distance;
+            infoLocation.textContent = item.dataset.location;
+            infoPrice.textContent = item.dataset.price;
+            infoLink.href = item.dataset.link;
+            infoLink.textContent = "公式サイト・予約サイトを開く";
+        }
+
+        const initialItem = cottageList.querySelector('.cottage-item');
+        updateInfo(initialItem);
+
+        toggleBtnPc.addEventListener('click', () => {
+            listContainer.classList.toggle('collapsed');
+            toggleBtnPc.textContent = listContainer.classList.contains('collapsed') ? '表示' : '隠す';
+        });
+
+        toggleBtnMobile.addEventListener('click', () => {
+            listContainer.classList.toggle('open');
+            toggleBtnMobile.textContent = listContainer.classList.contains('open') ? 'リストを隠す' : '候補リストを表示';
+        });
+
+        cottageList.addEventListener('click', function(e) {
+            const item = e.target.closest('.cottage-item');
+            updateInfo(item);
+            if (window.innerWidth <= 768) {
+                listContainer.classList.remove('open');
+                toggleBtnMobile.textContent = '候補リストを表示';
+            }
+        });
+    </script>
+
+</body>
+</html>
