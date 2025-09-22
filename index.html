@@ -40,11 +40,13 @@
             #toggle-list-pc { display: none; }
             
             #map-container { 
-                width: 100%; /* 横幅を100%に */
-                /* ★★★ 修正点 ★★★ */
-                /* 矛盾していたorder指定を削除 */
+                width: 100%;
                 padding-bottom: var(--header-height); 
                 box-sizing: border-box;
+                /* ★★★ 修正点：ここから2行を追加 ★★★ */
+                /* 地図と情報欄のレイアウトを正しく計算させるために必要でした */
+                display: flex;
+                flex-direction: column;
             }
             
             #info-box { 
@@ -53,8 +55,6 @@
             }
             
             #list-container {
-                /* ★★★ 修正点 ★★★ */
-                /* 矛盾していたorder指定を削除 */
                 position: fixed;
                 bottom: 0;
                 left: 0;
