@@ -43,10 +43,6 @@
                 width: 100%;
                 padding-bottom: var(--header-height); 
                 box-sizing: border-box;
-                /* ★★★ 修正点：ここから2行を追加 ★★★ */
-                /* 地図と情報欄のレイアウトを正しく計算させるために必要でした */
-                display: flex;
-                flex-direction: column;
             }
             
             #info-box { 
@@ -88,19 +84,19 @@
             <button id="toggle-list-mobile">候補リストを表示</button>
         </div>
         <ul id="cottage-list">
-            <li class="cottage-item" data-map-src="http://googleusercontent.com/maps/google.com/17" data-price="1泊～65,800円" data-distance="車で約11分 (4.6km)" data-location="富士急の西側、河口湖の南岸エリア。アクセス良好。" data-link="https://travel.rakuten.co.jp/HOTEL/177905/177905.html">1. 河口湖ヴィラ エフジェイリゾート</li>
-            <li class="cottage-item" data-map-src="http://googleusercontent.com/maps/google.com/18" data-price="1泊80,000円〜" data-distance="車で約15分 (8.2km)" data-location="河口湖の北西部、長浜エリア。富士山からは少し離れる。" data-link="https://fujiyamabase-kawaguchiko.com/">2. ふじやまべーす</li>
-            <li class="cottage-item" data-map-src="http://googleusercontent.com/maps/google.com/19" data-price="1泊56,840円" data-distance="車で約5分 (2.2km)" data-location="富士急から非常に近い船津エリア。河口湖IC付近。" data-link="https://fujinokura.jp/hotel/sukiya/">3. Fujinokura Sukiya 富士乃蔵 数奇屋</li>
-            <li class="cottage-item" data-map-src="http://googleusercontent.com/maps/google.com/20" data-price="1泊51,000～。6人までだから微妙" data-distance="車で約14分 (7.4km)" data-location="河口湖の北東岸エリア。湖畔の景色が楽しめる。" data-link="https://www.cottage-harvesttree.com/">4. Cottage Harvest tree コテージハーベストツリー</li>
-            <li class="cottage-item" data-map-src="http://googleusercontent.com/maps/google.com/21" data-price="1泊64,000円〜" data-distance="車で約6分 (2.3km)" data-location="富士急から非常に近い船津エリア。河口湖駅の南側。" data-link="https://travel.rakuten.co.jp/HOTEL/72724/72724.html">5. 蔵の宿松屋</li>
-            <li class="cottage-item" data-map-src="http://googleusercontent.com/maps/google.com/22" data-price="6人までだった微妙" data-distance="車で約19分 (10km)" data-location="河口湖の北岸、大石公園の近く。富士山ビューが有名。" data-link="https://www.urban-hotel.jp/kawaguchiko/">6. 河口湖アーバンリゾートヴィラ</li>
-            <li class="cottage-item" data-map-src="http://googleusercontent.com/maps/google.com/23" data-price="1泊105,900円" data-distance="車で約8分 (3.2km)" data-location="富士吉田市エリア。富士山の麓にあり、富士急にも近い。" data-link="https://www.fuyo-no-yado.jp/">7. 富士山リゾートログハウス ふようの宿</li>
-            <li class="cottage-item" data-map-src="http://googleusercontent.com/maps/google.com/24" data-price="予約可否確認できず。" data-distance="車で約8分 (3.2km)" data-location="富士吉田市エリア。ふようの宿の近く。富士急アクセス良好。" data-link="https://travel.rakuten.co.jp/HOTEL/4862/4862.html">8. パインツリー</li>
-            <li class="cottage-item" data-map-src="http://googleusercontent.com/maps/google.com/25" data-price="予約可否確認できず。" data-distance="車で約12分 (5.6km)" data-location="富士緑の休暇村の近く。広大な敷地が特徴。" data-link="https://travel.rakuten.co.jp/HOTEL/41646/41646.html">9. 森と湖の楽園 WorkShopCampResort</li>
-            <li class="cottage-item" data-map-src="http://googleusercontent.com/maps/google.com/26" data-price="1泊50,000円～" data-distance="車で約22分 (15km)" data-location="山中湖エリア。富士急からは少し距離があるが、湖畔を楽しめる。" data-link="http://cafe-rikyu.com/">10. カフェ&オーベルジュ里休</li>
-            <li class="cottage-item" data-map-src="http://googleusercontent.com/maps/google.com/27" data-price="1泊50,000円～。すき焼き・しゃぶしゃぶとかご飯のプラン有" data-distance="車で約51分 (39km)" data-location="【要注意】八ヶ岳エリア。富士急から非常に遠いので注意。" data-link="https://travel.rakuten.co.jp/hinfo/182653/">11. AMBIENT 八ヶ岳プレミアムコテージ</li>
-            <li class="cottage-item" data-map-src="http://googleusercontent.com/maps/google.com/28" data-price="予約可否確認できず。" data-distance="車で約53分 (41km)" data-location="【要注意】八ヶ岳エリア。富士急から非常に遠いので注意。" data-link="https://chikarasou.cloudfree.jp/">12. 貸別荘八ヶ岳石堂ガーデンちから荘</li>
-            <li class="cottage-item" data-map-src="http://googleusercontent.com/maps/google.com/29" data-price="3か月前から予約可能。確認できる範囲で1泊75,000円～" data-distance="車で約12分 (6.8km)" data-location="鳴沢村エリア。富士山の樹海に近く、静かな環境。" data-link="https://travel.rakuten.co.jp/HOTEL/162711/162711.html">13. 富士の住み家 りぶらん</li>
+            <li class="cottage-item" data-map-src="https://maps.google.com/maps?q=山梨県南都留郡富士河口湖町小立3929-1&output=embed" data-price="1泊～65,800円" data-distance="車で約11分 (4.6km)" data-location="富士急の西側、河口湖の南岸エリア。アクセス良好。" data-link="https://travel.rakuten.co.jp/HOTEL/177905/177905.html">1. 河口湖ヴィラ エフジェイリゾート</li>
+            <li class="cottage-item" data-map-src="https://maps.google.com/maps?q=山梨県南都留郡富士河口湖町長浜2384-1&output=embed" data-price="1泊80,000円〜" data-distance="車で約15分 (8.2km)" data-location="河口湖の北西部、長浜エリア。富士山からは少し離れる。" data-link="https://fujiyamabase-kawaguchiko.com/">2. ふじやまべーす</li>
+            <li class="cottage-item" data-map-src="https://maps.google.com/maps?q=山梨県南都留郡富士河口湖町船津1062-1&output=embed" data-price="1泊56,840円" data-distance="車で約5分 (2.2km)" data-location="富士急から非常に近い船津エリア。河口湖IC付近。" data-link="https://fujinokura.jp/hotel/sukiya/">3. Fujinokura Sukiya 富士乃蔵 数奇屋</li>
+            <li class="cottage-item" data-map-src="https://maps.google.com/maps?q=山梨県南都留郡富士河口湖町河口551&output=embed" data-price="1泊51,000～。6人までだから微妙" data-distance="車で約14分 (7.4km)" data-location="河口湖の北東岸エリア。湖畔の景色が楽しめる。" data-link="https://www.cottage-harvesttree.com/">4. Cottage Harvest tree コテージハーベストツリー</li>
+            <li class="cottage-item" data-map-src="https://maps.google.com/maps?q=山梨県南都留郡富士河口湖町船津282&output=embed" data-price="1泊64,000円〜" data-distance="車で約6分 (2.3km)" data-location="富士急から非常に近い船津エリア。河口湖駅の南側。" data-link="https://travel.rakuten.co.jp/HOTEL/72724/72724.html">5. 蔵の宿松屋</li>
+            <li class="cottage-item" data-map-src="https://maps.google.com/maps?q=山梨県南都留郡富士河口湖町大石2585-122&output=embed" data-price="6人までだった微妙" data-distance="車で約19分 (10km)" data-location="河口湖の北岸、大石公園の近く。富士山ビューが有名。" data-link="https://www.urban-hotel.jp/kawaguchiko/">6. 河口湖アーバンリゾートヴィラ</li>
+            <li class="cottage-item" data-map-src="https://maps.google.com/maps?q=山梨県富士吉田市松山1394&output=embed" data-price="1泊105,900円" data-distance="車で約8分 (3.2km)" data-location="富士吉田市エリア。富士山の麓にあり、富士急にも近い。" data-link="https://www.fuyo-no-yado.jp/">7. 富士山リゾートログハウス ふようの宿</li>
+            <li class="cottage-item" data-map-src="https://maps.google.com/maps?q=山梨県富士吉田市松山1229&output=embed" data-price="予約可否確認できず。" data-distance="車で約8分 (3.2km)" data-location="富士吉田市エリア。ふようの宿の近く。富士急アクセス良好。" data-link="https://travel.rakuten.co.jp/HOTEL/4862/4862.html">8. パインツリー</li>
+            <li class="cottage-item" data-map-src="https://maps.google.com/maps?q=山梨県南都留郡富士河口湖町小立5606&output=embed" data-price="予約可否確認できず。" data-distance="車で約12分 (5.6km)" data-location="富士緑の休暇村の近く。広大な敷地が特徴。" data-link="https://travel.rakuten.co.jp/HOTEL/41646/41646.html">9. 森と湖の楽園 WorkShopCampResort</li>
+            <li class="cottage-item" data-map-src="https://maps.google.com/maps?q=山梨県南都留郡山中湖村平野2408-1&output=embed" data-price="1泊50,000円～" data-distance="車で約22分 (15km)" data-location="山中湖エリア。富士急からは少し距離があるが、湖畔を楽しめる。" data-link="http://cafe-rikyu.com/">10. カフェ&オーベルジュ里休</li>
+            <li class="cottage-item" data-map-src="https://maps.google.com/maps?q=山梨県北杜市大泉町谷戸8741-61&output=embed" data-price="1泊50,000円～。すき焼き・しゃぶしゃぶとかご飯のプラン有" data-distance="車で約51分 (39km)" data-location="【要注意】八ヶ岳エリア。富士急から非常に遠いので注意。" data-link="https://travel.rakuten.co.jp/hinfo/182653/">11. AMBIENT 八ヶ岳プレミアムコテージ</li>
+            <li class="cottage-item" data-map-src="https://maps.google.com/maps?q=山梨県北杜市大泉町西井出8240-4288&output=embed" data-price="予約可否確認できず。" data-distance="車で約53分 (41km)" data-location="【要注意】八ヶ岳エリア。富士急から非常に遠いので注意。" data-link="https://chikarasou.cloudfree.jp/">12. 貸別荘八ヶ岳石堂ガーデンちから荘</li>
+            <li class="cottage-item" data-map-src="https://maps.google.com/maps?q=山梨県南都留郡鳴沢村5595-1&output=embed" data-price="3か月前から予約可能。確認できる範囲で1泊75,000円～" data-distance="車で約12分 (6.8km)" data-location="鳴沢村エリア。富士山の樹海に近く、静かな環境。" data-link="https://travel.rakuten.co.jp/HOTEL/162711/162711.html">13. 富士の住み家 りぶらん</li>
         </ul>
     </div>
 
