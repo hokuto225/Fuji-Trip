@@ -6,38 +6,69 @@
     <title>コテージ候補リスト</title>
     <style>
         /* 基本スタイル */
+        :root { --header-height: 60px; }
         html, body { height: 100%; margin: 0; font-family: 'Segoe UI', Meiryo, sans-serif; }
-        body { display: flex; }
-        #list-container { width: 35%; max-width: 450px; height: 100%; overflow-y: auto; border-right: 1px solid #ddd; box-sizing: border-box; padding: 15px; background-color: #fcfcfc; }
-        #map-container { flex-grow: 1; height: 100%; display: flex; flex-direction: column; background-color: #f0f0f0; }
-        #map-frame { flex-grow: 1; border: none; }
-        h1, h2 { color: #333; margin-top: 0; border-bottom: 2px solid #007bff; padding-bottom: 8px; }
-        h1 { font-size: 1.5em; }
-        ul { list-style-type: none; padding: 0; margin: 0; }
-        li.cottage-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #eee; transition: background-color 0.2s; }
+        body { display: flex; overflow: hidden; }
+        #list-container { width: 35%; max-width: 450px; height: 100%; display: flex; flex-direction: column; border-right: 1px solid #ddd; box-sizing: border-box; background-color: #fcfcfc; transition: width 0.3s ease, padding 0.3s ease; }
+        #list-header { display: flex; justify-content: space-between; align-items: center; padding: 0 15px; height: var(--header-height); border-bottom: 2px solid #007bff; }
+        #list-header h1 { font-size: 1.5em; margin: 0; }
+        #toggle-list-pc { cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; border-radius: 5px; background-color: #f0f0f0; }
+        #cottage-list { list-style-type: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1; }
+        li.cottage-item { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #eee; transition: background-color 0.2s; }
         li.cottage-item:hover { background-color: #f0f8ff; }
-        li.cottage-item.active { background-color: #e0f0ff; font-weight: bold; color: #0056b3; border-left: 4px solid #007bff; padding-left: 8px; }
+        li.cottage-item.active { background-color: #e0f0ff; font-weight: bold; color: #0056b3; border-left: 4px solid #007bff; padding-left: 11px; }
+        #map-container { flex-grow: 1; height: 100%; display: flex; flex-direction: column; }
+        #map-frame { flex-grow: 1; border: none; }
         #info-box { padding: 15px; background-color: #fff; border-top: 1px solid #ddd; box-sizing: border-box; }
-        #info-box h2 { font-size: 1.2em; border: none; padding-bottom: 0; margin-bottom: 10px; }
+        #info-box h2 { font-size: 1.2em; border: none; padding: 0; margin: 0 0 10px 0; }
         #info-box p { margin: 8px 0; font-size: 0.9em; }
         #info-box strong { color: #555; min-width: 110px; display: inline-block; }
         a { color: #007bff; text-decoration: none; }
         a:hover { text-decoration: underline; }
 
+        /* PC用：リストが折りたたまれた時のスタイル */
+        #list-container.collapsed { width: 0; padding: 0; border-right: none; }
+        #list-container.collapsed > * { display: none; }
+        #toggle-list-mobile { display: none; }
+
         /* ▼▼▼ スマートフォン対応スタイル ▼▼▼ */
         @media (max-width: 768px) {
-            body { flex-direction: column; height: auto; }
-            #list-container { width: 100%; max-width: none; height: auto; max-height: 45vh; /* 画面の高さの45%をリストエリアに */ border-right: none; border-bottom: 2px solid #007bff; }
-            #map-container { width: 100%; height: 55vh; /* 画面の高さの55%を地図エリアに */ }
-            h1 { font-size: 1.2em; padding-bottom: 5px; margin-bottom: 10px; }
-            #info-box h2 { font-size: 1.1em; }
+            body { flex-direction: column; overflow: auto; height: 100%; } /* Changed */
+            #toggle-list-pc { display: none; } /* PC用ボタンを隠す */
+            #map-container { order: 1; flex-grow: 1; height: 100%; } /* 地図を一番上に、高さを可変に */
+            #info-box { flex-shrink: 0; } /* 情報欄は縮まない */
+            #list-container {
+                order: 2; /* リストを一番下に */
+                position: fixed; /* 画面下部に固定 */
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                max-width: none;
+                height: auto;
+                max-height: 80vh; /* 最大でも画面の80%まで */
+                background-color: white;
+                box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+                border-right: none;
+                transform: translateY(calc(100% - var(--header-height))); /* ヘッダーだけ見えるように隠す */
+                transition: transform 0.3s ease-in-out;
+            }
+            #list-container.open {
+                transform: translateY(0); /* .openクラスがついたら完全に表示 */
+            }
+            #list-header { background-color: white; border-bottom: 1px solid #ddd; }
+            #list-header h1 { font-size: 1.2em; }
+            #toggle-list-mobile { display: block; padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 5px; font-size: 0.9em; }
         }
     </style>
 </head>
 <body>
 
     <div id="list-container">
-        <h1>コテージ候補</h1>
+        <div id="list-header">
+            <h1>コテージ候補</h1>
+            <button id="toggle-list-pc">隠す</button>
+            <button id="toggle-list-mobile">候補リストを表示</button>
+        </div>
         <ul id="cottage-list">
             <li class="cottage-item"
                 data-map-src="https://www.google.com/maps?q=山梨県南都留郡富士河口湖町小立３９２９−１&output=embed"
@@ -186,6 +217,7 @@
 
     <script>
         // 要素を取得
+        const listContainer = document.getElementById('list-container');
         const cottageList = document.getElementById('cottage-list');
         const mapFrame = document.getElementById('map-frame');
         const infoName = document.getElementById('info-name');
@@ -194,16 +226,14 @@
         const infoDetails = document.getElementById('info-details');
         const infoPrice = document.getElementById('info-price');
         const infoLink = document.getElementById('info-link');
+        const toggleBtnPc = document.getElementById('toggle-list-pc');
+        const toggleBtnMobile = document.getElementById('toggle-list-mobile');
 
-        // クリックされた時の情報更新を行う関数
+        // 情報更新を行う関数
         function updateInfo(item) {
             if (!item) return;
-            // すべての項目の選択状態を解除
             document.querySelectorAll('.cottage-item').forEach(el => el.classList.remove('active'));
-            // クリックされた項目を選択状態にする
             item.classList.add('active');
-
-            // データ属性から情報を取得
             mapFrame.src = item.dataset.mapSrc;
             infoName.textContent = item.textContent.trim();
             infoDistance.textContent = item.dataset.distance;
@@ -214,14 +244,31 @@
             infoLink.textContent = "公式サイト・予約サイトを開く";
         }
 
-        // ページ読み込み時に最初の項目を自動で表示
+        // 初期表示
         const initialItem = cottageList.querySelector('.cottage-item');
         updateInfo(initialItem);
 
-        // リストの項目がクリックされた時のイベント
+        // PC用ボタンのイベント
+        toggleBtnPc.addEventListener('click', () => {
+            listContainer.classList.toggle('collapsed');
+            toggleBtnPc.textContent = listContainer.classList.contains('collapsed') ? '表示' : '隠す';
+        });
+
+        // スマホ用ボタンのイベント
+        toggleBtnMobile.addEventListener('click', () => {
+            listContainer.classList.toggle('open');
+            toggleBtnMobile.textContent = listContainer.classList.contains('open') ? 'リストを隠す' : '候補リストを表示';
+        });
+
+        // リスト項目クリック時のイベント
         cottageList.addEventListener('click', function(e) {
             const item = e.target.closest('.cottage-item');
             updateInfo(item);
+            // スマホ表示の時、項目を選んだらリストを自動で閉じる
+            if (window.innerWidth <= 768) {
+                listContainer.classList.remove('open');
+                toggleBtnMobile.textContent = '候補リストを表示';
+            }
         });
     </script>
 
