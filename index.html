@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>コテージ候補リスト</title>
     <style>
-        /* CSSとJavaScriptは変更ありません */
         :root { --header-height: 60px; }
         html, body { height: 100%; margin: 0; font-family: 'Segoe UI', Meiryo, sans-serif; }
         body { display: flex; overflow: hidden; }
@@ -20,24 +19,27 @@
         #map-container { flex-grow: 1; height: 100%; display: flex; flex-direction: column; }
         #map-frame { flex-grow: 1; border: none; }
         #info-box { padding: 15px; background-color: #fff; border-top: 1px solid #ddd; box-sizing: border-box; }
-        #info-box h2 { font-size: 1.2em; border: none; padding: 0; margin: 0 0 10px 0; }
+        #info-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        #info-nav h2 { font-size: 1.2em; margin: 0; text-align: center; flex-grow: 1; }
+        #info-nav button { background: #f0f0f0; border: 1px solid #ccc; font-size: 1.2em; cursor: pointer; padding: 5px 12px; border-radius: 5px; }
+        #info-nav button:disabled { opacity: 0.3; cursor: not-allowed; }
         #info-box p { margin: 8px 0; font-size: 0.9em; }
         #info-box strong { color: #555; min-width: 110px; display: inline-block; }
         a { color: #007bff; text-decoration: none; }
         a:hover { text-decoration: underline; }
         #list-container.collapsed { width: 0; padding: 0; border-right: none; }
         #list-container.collapsed > * { display: none; }
-        #toggle-list-mobile { display: none; }
+        #fab-toggle-list { display: none; }
+
         @media (max-width: 768px) {
             body { height: 100vh; overflow: hidden; }
-            #toggle-list-pc { display: none; }
-            #map-container { width: 100%; padding-bottom: var(--header-height); box-sizing: border-box; }
-            #info-box { flex-shrink: 0; overflow-y: auto; }
-            #list-container { position: fixed; bottom: 0; left: 0; width: 100%; max-width: none; height: auto; max-height: 80vh; background-color: white; box-shadow: 0 -4px 10px rgba(0,0,0,0.1); border-right: none; transform: translateY(calc(100% - var(--header-height))); transition: transform 0.3s ease-in-out; }
+            #toggle-list-pc, #toggle-list-mobile { display: none; }
+            #map-container { width: 100%; height: 100%; padding-bottom: 0; }
+            #info-box { position: fixed; bottom: 0; width: 100%; box-sizing: border-box; background: white; box-shadow: 0 -2px 5px rgba(0,0,0,0.1); }
+            #list-container { position: fixed; bottom: 0; left: 0; width: 100%; max-width: none; height: 80vh; max-height: 80vh; background-color: white; box-shadow: 0 -4px 10px rgba(0,0,0,0.1); border-right: none; transform: translateY(100%); transition: transform 0.3s ease-in-out; }
             #list-container.open { transform: translateY(0); }
-            #list-header { background-color: white; border-bottom: 1px solid #ddd; }
             #list-header h1 { font-size: 1.2em; }
-            #toggle-list-mobile { display: block; padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 5px; font-size: 0.9em; }
+            #fab-toggle-list { display: flex; justify-content: center; align-items: center; position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; background-color: #007bff; color: white; border: none; border-radius: 50%; box-shadow: 0 4px 8px rgba(0,0,0,0.2); font-size: 24px; cursor: pointer; z-index: 1000; }
         }
     </style>
 </head>
@@ -46,30 +48,19 @@
     <div id="list-container">
         <div id="list-header">
             <h1>コテージ候補</h1>
-            <button id="toggle-list-pc">隠す</button>
-            <button id="toggle-list-mobile">候補リストを表示</button>
         </div>
         <ul id="cottage-list">
-            <li class="cottage-item" data-map-src="https://www.google.com/maps?q=山梨県南都留郡富士河口湖町小立３９２９−１&output=embed" data-gmap-link="https://maps.app.goo.gl/rE6F2HBJ4cdxuMHj8" data-price="1泊～65,800円" data-distance="車で約11分 (4.6km)" data-location="富士急の西側、河口湖の南岸エリア。アクセス良好。" data-link="https://travel.rakuten.co.jp/HOTEL/177905/177905.html">1. 河口湖ヴィラ エフジェイリゾート</li>
-            <li class="cottage-item" data-map-src="https://www.google.com/maps?q=山梨県南都留郡富士河口湖町長浜２３８４−１&output=embed" data-gmap-link="https://maps.app.goo.gl/yefhFMXwBKw8DHCMA" data-price="1泊80,000円〜" data-distance="車で約15分 (8.2km)" data-location="河口湖の北西部、長浜エリア。富士山からは少し離れる。" data-link="https://fujiyamabase-kawaguchiko.com/">2. ふじやまべーす</li>
-            <li class="cottage-item" data-map-src="https://www.google.com/maps?q=山梨県南都留郡富士河口湖町船津１０６２−１&output=embed" data-gmap-link="https://maps.app.goo.gl/ksMfAmJb4mRGfK5C9" data-price="1泊56,840円" data-distance="車で約5分 (2.2km)" data-location="富士急から非常に近い船津エリア。河口湖IC付近。" data-link="https://fujinokura.jp/hotel/sukiya/">3. Fujinokura Sukiya 富士乃蔵 数奇屋</li>
-            <li class="cottage-item" data-map-src="https://www.google.com/maps?q=山梨県南都留郡富士河口湖町河口５５１&output=embed" data-gmap-link="https://maps.app.goo.gl/3dGR8bsjFmRDv4XE9" data-price="1泊51,000～。6人までだから微妙" data-distance="車で約14分 (7.4km)" data-location="河口湖の北東岸エリア。湖畔の景色が楽しめる。" data-link="https://www.cottage-harvesttree.com/">4. Cottage Harvest tree コテージハーベストツリー</li>
-            <li class="cottage-item" data-map-src="https://www.google.com/maps?q=山梨県南都留郡富士河口湖町船津２８２&output=embed" data-gmap-link="https://maps.app.goo.gl/1jGoE6wunTcop6xB7" data-price="1泊64,000円〜" data-distance="車で約6分 (2.3km)" data-location="富士急から非常に近い船津エリア。河口湖駅の南側。" data-link="https://travel.rakuten.co.jp/HOTEL/72724/72724.html">5. 蔵の宿松屋</li>
-            <li class="cottage-item" data-map-src="https://www.google.com/maps?q=山梨県南都留郡富士河口湖町大石２５８５−１２２&output=embed" data-gmap-link="https://maps.app.goo.gl/qPFrsoxVZrK5xfhe8" data-price="6人までだった微妙" data-distance="車で約19分 (10km)" data-location="河口湖の北岸、大石公園の近く。富士山ビューが有名。" data-link="https://www.urban-hotel.jp/kawaguchiko/">6. 河口湖アーバンリゾートヴィラ</li>
-            <li class="cottage-item" data-map-src="https://www.google.com/maps?q=山梨県富士吉田市松山１３９４&output=embed" data-gmap-link="https://maps.app.goo.gl/WqW38BZK3fjFtWcT8" data-price="1泊105,900円" data-distance="車で約8分 (3.2km)" data-location="富士吉田市エリア。富士山の麓にあり、富士急にも近い。" data-link="https://www.fuyo-no-yado.jp/">7. 富士山リゾートログハウス ふようの宿</li>
-            <li class="cottage-item" data-map-src="https://www.google.com/maps?q=山梨県富士吉田市松山１２２９&output=embed" data-gmap-link="https://maps.app.goo.gl/YxSq32VjRSex9Q6G7" data-price="予約可否確認できず。" data-distance="車で約8分 (3.2km)" data-location="富士吉田市エリア。ふようの宿の近く。富士急アクセス良好。" data-link="https://travel.rakuten.co.jp/HOTEL/4862/4862.html">8. パインツリー</li>
-            <li class="cottage-item" data-map-src="https://www.google.com/maps?q=山梨県南都留郡富士河口湖町小立５６０６&output=embed" data-gmap-link="https://maps.app.goo.gl/EQriS7dUwjAVrDAi9" data-price="予約可否確認できず。" data-distance="車で約12分 (5.6km)" data-location="富士緑の休暇村の近く。広大な敷地が特徴。" data-link="https://travel.rakuten.co.jp/HOTEL/41646/41646.html">9. 森と湖の楽園 WorkShopCampResort</li>
-            <li class="cottage-item" data-map-src="https://www.google.com/maps?q=山梨県南都留郡山中湖村平野２４０８−１&output=embed" data-gmap-link="https://maps.app.goo.gl/gcX4dxbHQ5awgV6F9" data-price="1泊50,000円～" data-distance="車で約22分 (15km)" data-location="山中湖エリア。富士急からは少し距離があるが、湖畔を楽しめる。" data-link="http://cafe-rikyu.com/">10. カフェ&オーベルジュ里休</li>
-            <li class="cottage-item" data-map-src="https://www.google.com/maps?q=山梨県北杜市大泉町谷戸８７４１−６１&output=embed" data-gmap-link="https://maps.app.goo.gl/M8qwAEtv6p7Dx74j7" data-price="1泊50,000円～。すき焼き・しゃぶしゃぶとかご飯のプラン有" data-distance="車で約51分 (39km)" data-location="【要注意】八ヶ岳エリア。富士急から非常に遠いので注意。" data-link="https://travel.rakuten.co.jp/hinfo/182653/">11. AMBIENT 八ヶ岳プレミアムコテージ</li>
-            <li class="cottage-item" data-map-src="https://www.google.com/maps?q=山梨県北杜市大泉町西井出８２４０−４２８８&output=embed" data-gmap-link="https://maps.app.goo.gl/kX5XF2S5VkvvPwbE8" data-price="予約可否確認できず。" data-distance="車で約53分 (41km)" data-location="【要注意】八ヶ岳エリア。富士急から非常に遠いので注意。" data-link="https://chikarasou.cloudfree.jp/">12. 貸別荘八ヶ岳石堂ガーデンちから荘</li>
-            <li class="cottage-item" data-map-src="https://www.google.com/maps?q=山梨県南都留郡鳴沢村５５９５−１&output=embed" data-gmap-link="https://maps.app.goo.gl/vQqd8HkjJeETigRu9" data-price="3か月前から予約可能。確認できる範囲で1泊75,000円～" data-distance="車で約12分 (6.8km)" data-location="鳴沢村エリア。富士山の樹海に近く、静かな環境。" data-link="https://travel.rakuten.co.jp/HOTEL/162711/162711.html">13. 富士の住み家 りぶらん</li>
-        </ul>
+            </ul>
     </div>
 
     <div id="map-container">
-        <iframe id="map-frame" src="" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <iframe id="map-frame" src=""></iframe>
         <div id="info-box">
-            <h2 id="info-name"></h2>
+            <div id="info-nav">
+                <button id="prev-cottage">＜</button>
+                <h2 id="info-name"></h2>
+                <button id="next-cottage">＞</button>
+            </div>
             <p><strong>富士急からの距離:</strong> <span id="info-distance"></span></p>
             <p><strong>ロケーション:</strong> <span id="info-location"></span></p>
             <p><strong>価格帯の目安:</strong> <span id="info-price"></span></p>
@@ -78,8 +69,10 @@
         </div>
     </div>
 
+    <button id="fab-toggle-list">☰</button>
+
     <script>
-        /* JavaScriptは変更ありません */
+        // === 要素の取得 ===
         const listContainer = document.getElementById('list-container');
         const cottageList = document.getElementById('cottage-list');
         const mapFrame = document.getElementById('map-frame');
@@ -90,43 +83,102 @@
         const infoLink = document.getElementById('info-link');
         const infoGmapLink = document.getElementById('info-gmap-link');
         const toggleBtnPc = document.getElementById('toggle-list-pc');
-        const toggleBtnMobile = document.getElementById('toggle-list-mobile');
+        const fabToggleList = document.getElementById('fab-toggle-list');
+        const prevBtn = document.getElementById('prev-cottage');
+        const nextBtn = document.getElementById('next-cottage');
 
-        function updateInfo(item) {
-            if (!item) return;
-            document.querySelectorAll('.cottage-item').forEach(el => el.classList.remove('active'));
+        // === データと状態管理 ===
+        let currentCottageIndex = 0;
+        const allCottages = []; // あとでli要素を格納
+
+        // 13個のコテージのデータをHTMLから読み込み、ul要素に追加
+        const cottageData = [
+            { mapSrc: "https://www.google.com/maps?q=山梨県南都留郡富士河口湖町小立３９２９−１&output=embed", gmapLink: "https://maps.app.goo.gl/rE6F2HBJ4cdxuMHj8", price: "1泊～65,800円", distance: "車で約11分 (4.6km)", location: "富士急の西側、河口湖の南岸エリア。アクセス良好。", link: "https://travel.rakuten.co.jp/HOTEL/177905/177905.html", name: "1. 河口湖ヴィラ エフジェイリゾート" },
+            { mapSrc: "https://www.google.com/maps?q=山梨県南都留郡富士河口湖町長浜２３８４−１&output=embed", gmapLink: "https://maps.app.goo.gl/yefhFMXwBKw8DHCMA", price: "1泊80,000円〜", distance: "車で約15分 (8.2km)", location: "河口湖の北西部、長浜エリア。富士山からは少し離れる。", link: "https://fujiyamabase-kawaguchiko.com/", name: "2. ふじやまべーす" },
+            { mapSrc: "https://www.google.com/maps?q=山梨県南都留郡富士河口湖町船津１０６２−１&output=embed", gmapLink: "https://maps.app.goo.gl/ksMfAmJb4mRGfK5C9", price: "1泊56,840円", distance: "車で約5分 (2.2km)", location: "富士急から非常に近い船津エリア。河口湖IC付近。", link: "https://fujinokura.jp/hotel/sukiya/", name: "3. Fujinokura Sukiya 富士乃蔵 数奇屋" },
+            { mapSrc: "https://www.google.com/maps?q=山梨県南都留郡富士河口湖町河口５５１&output=embed", gmapLink: "https://maps.app.goo.gl/3dGR8bsjFmRDv4XE9", price: "1泊51,000～。6人までだから微妙", distance: "車で約14分 (7.4km)", location: "河口湖の北東岸エリア。湖畔の景色が楽しめる。", link: "https://www.cottage-harvesttree.com/", name: "4. Cottage Harvest tree コテージハーベストツリー" },
+            { mapSrc: "https://www.google.com/maps?q=山梨県南都留郡富士河口湖町船津２８２&output=embed", gmapLink: "https://maps.app.goo.gl/1jGoE6wunTcop6xB7", price: "1泊64,000円〜", distance: "車で約6分 (2.3km)", location: "富士急から非常に近い船津エリア。河口湖駅の南側。", link: "https://travel.rakuten.co.jp/HOTEL/72724/72724.html", name: "5. 蔵の宿松屋" },
+            { mapSrc: "https://www.google.com/maps?q=山梨県南都留郡富士河口湖町大石２５８５−１２２&output=embed", gmapLink: "https://maps.app.goo.gl/qPFrsoxVZrK5xfhe8", price: "6人までだった微妙", distance: "車で約19分 (10km)", location: "河口湖の北岸、大石公園の近く。富士山ビューが有名。", link: "https://www.urban-hotel.jp/kawaguchiko/", name: "6. 河口湖アーバンリゾートヴィラ" },
+            { mapSrc: "https://www.google.com/maps?q=山梨県富士吉田市松山１３９４&output=embed", gmapLink: "https://maps.app.goo.gl/WqW38BZK3fjFtWcT8", price: "1泊105,900円", distance: "車で約8分 (3.2km)", location: "富士吉田市エリア。富士山の麓にあり、富士急にも近い。", link: "https://www.fuyo-no-yado.jp/", name: "7. 富士山リゾートログハウス ふようの宿" },
+            { mapSrc: "https://www.google.com/maps?q=山梨県富士吉田市松山１２２９&output=embed", gmapLink: "https://maps.app.goo.gl/YxSq32VjRSex9Q6G7", price: "予約可否確認できず。", distance: "車で約8分 (3.2km)", location: "富士吉田市エリア。ふようの宿の近く。富士急アクセス良好。", link: "https://travel.rakuten.co.jp/HOTEL/4862/4862.html", name: "8. パインツリー" },
+            { mapSrc: "https://www.google.com/maps?q=山梨県南都留郡富士河口湖町小立５６０６&output=embed", gmapLink: "https://maps.app.goo.gl/EQriS7dUwjAVrDAi9", price: "予約可否確認できず。", distance: "車で約12分 (5.6km)", location: "富士緑の休暇村の近く。広大な敷地が特徴。", link: "https://travel.rakuten.co.jp/HOTEL/41646/41646.html", name: "9. 森と湖の楽園 WorkShopCampResort" },
+            { mapSrc: "https://www.google.com/maps?q=山梨県南都留郡山中湖村平野２４０８−１&output=embed", gmapLink: "https://maps.app.goo.gl/gcX4dxbHQ5awgV6F9", price: "1泊50,000円～", distance: "車で約22分 (15km)", location: "山中湖エリア。富士急からは少し距離があるが、湖畔を楽しめる。", link: "http://cafe-rikyu.com/", name: "10. カフェ&オーベルジュ里休" },
+            { mapSrc: "https://www.google.com/maps?q=山梨県北杜市大泉町谷戸８７４１−６１&output=embed", gmapLink: "https://maps.app.goo.gl/M8qwAEtv6p7Dx74j7", price: "1泊50,000円～。すき焼き・しゃぶしゃぶとかご飯のプラン有", distance: "車で約51分 (39km)", location: "【要注意】八ヶ岳エリア。富士急から非常に遠いので注意。", link: "https://travel.rakuten.co.jp/hinfo/182653/", name: "11. AMBIENT 八ヶ岳プレミアムコテージ" },
+            { mapSrc: "https://www.google.com/maps?q=山梨県北杜市大泉町西井出８２４０−４２８８&output=embed", gmapLink: "https://maps.app.goo.gl/kX5XF2S5VkvvPwbE8", price: "予約可否確認できず。", distance: "車で約53分 (41km)", location: "【要注意】八ヶ岳エリア。富士急から非常に遠いので注意。", link: "https://chikarasou.cloudfree.jp/", name: "12. 貸別荘八ヶ岳石堂ガーデンちから荘" },
+            { mapSrc: "https://www.google.com/maps?q=山梨県南都留郡鳴沢村５５９５−１&output=embed", gmapLink: "https://maps.app.goo.gl/vQqd8HkjJeETigRu9", price: "3か月前から予約可能。確認できる範囲で1泊75,000円～", distance: "車で約12分 (6.8km)", location: "鳴沢村エリア。富士山の樹海に近く、静かな環境。", link: "https://travel.rakuten.co.jp/HOTEL/162711/162711.html", name: "13. 富士の住み家 りぶらん" }
+        ];
+
+        cottageData.forEach((data, index) => {
+            const li = document.createElement('li');
+            li.className = 'cottage-item';
+            li.textContent = data.name;
+            li.dataset.index = index; // インデックスを保存
+            cottageList.appendChild(li);
+            allCottages.push(li); // 配列に要素を追加
+        });
+
+        // === 関数 ===
+        function updateInfo(index) {
+            currentCottageIndex = index;
+            const data = cottageData[index];
+            const item = allCottages[index];
+
+            // リストのアクティブ表示を更新
+            allCottages.forEach(li => li.classList.remove('active'));
             item.classList.add('active');
-            mapFrame.src = item.dataset.mapSrc;
-            infoName.textContent = item.textContent.trim();
-            infoDistance.textContent = item.dataset.distance;
-            infoLocation.textContent = item.dataset.location;
-            infoPrice.textContent = item.dataset.price;
-            infoLink.href = item.dataset.link;
+
+            // 情報欄と地図を更新
+            mapFrame.src = data.mapSrc;
+            infoName.textContent = data.name;
+            infoDistance.textContent = data.distance;
+            infoLocation.textContent = data.location;
+            infoPrice.textContent = data.price;
+            infoLink.href = data.link;
             infoLink.textContent = "公式サイト・予約サイト";
-            infoGmapLink.href = item.dataset.gmapLink;
+            infoGmapLink.href = data.gmapLink;
+
+            // 前へ/次へボタンの状態を更新
+            prevBtn.disabled = index === 0;
+            nextBtn.disabled = index === cottageData.length - 1;
         }
 
-        const initialItem = cottageList.querySelector('.cottage-item');
-        updateInfo(initialItem);
-
+        // === イベントリスナー ===
         toggleBtnPc.addEventListener('click', () => {
             listContainer.classList.toggle('collapsed');
             toggleBtnPc.textContent = listContainer.classList.contains('collapsed') ? '表示' : '隠す';
         });
 
-        toggleBtnMobile.addEventListener('click', () => {
+        fabToggleList.addEventListener('click', () => {
             listContainer.classList.toggle('open');
-            toggleBtnMobile.textContent = listContainer.classList.contains('open') ? 'リストを隠す' : '候補リストを表示';
+            fabToggleList.textContent = listContainer.classList.contains('open') ? '↓' : '☰';
         });
 
-        cottageList.addEventListener('click', function(e) {
+        cottageList.addEventListener('click', (e) => {
             const item = e.target.closest('.cottage-item');
-            updateInfo(item);
-            if (window.innerWidth <= 768) {
-                listContainer.classList.remove('open');
-                toggleBtnMobile.textContent = '候補リストを表示';
+            if (item) {
+                const index = parseInt(item.dataset.index, 10);
+                updateInfo(index);
+                if (window.innerWidth <= 768) {
+                    listContainer.classList.remove('open');
+                    fabToggleList.textContent = '☰';
+                }
             }
         });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentCottageIndex > 0) {
+                updateInfo(currentCottageIndex - 1);
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentCottageIndex < cottageData.length - 1) {
+                updateInfo(currentCottageIndex + 1);
+            }
+        });
+
+        // === 初期化 ===
+        updateInfo(0); // 最初のコテージを表示
     </script>
 
 </body>
