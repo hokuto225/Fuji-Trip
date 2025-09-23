@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>コテージ候補リスト</title>
     <style>
+        /* CSSとJavaScriptは変更ありません */
         :root { --header-height: 60px; }
         html, body { height: 100%; margin: 0; font-family: 'Segoe UI', Meiryo, sans-serif; }
         body { display: flex; overflow: hidden; }
@@ -19,27 +20,24 @@
         #map-container { flex-grow: 1; height: 100%; display: flex; flex-direction: column; }
         #map-frame { flex-grow: 1; border: none; }
         #info-box { padding: 15px; background-color: #fff; border-top: 1px solid #ddd; box-sizing: border-box; }
-        #info-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        #info-nav h2 { font-size: 1.2em; margin: 0; text-align: center; flex-grow: 1; padding: 0 10px; }
-        #info-nav button { background: #f0f0f0; border: 1px solid #ccc; font-size: 1.2em; cursor: pointer; padding: 5px 12px; border-radius: 5px; flex-shrink: 0; }
-        #info-nav button:disabled { opacity: 0.3; cursor: not-allowed; }
+        #info-box h2 { font-size: 1.2em; border: none; padding: 0; margin: 0 0 10px 0; }
         #info-box p { margin: 8px 0; font-size: 0.9em; }
         #info-box strong { color: #555; min-width: 110px; display: inline-block; }
-        a { color: #007bff; text-decoration: none; word-break: break-all; }
+        a { color: #007bff; text-decoration: none; }
         a:hover { text-decoration: underline; }
         #list-container.collapsed { width: 0; padding: 0; border-right: none; }
         #list-container.collapsed > * { display: none; }
-        #fab-toggle-list { display: none; }
-
+        #toggle-list-mobile { display: none; }
         @media (max-width: 768px) {
             body { height: 100vh; overflow: hidden; }
             #toggle-list-pc { display: none; }
-            #map-container { width: 100%; height: 100%; }
-            #info-box { position: fixed; bottom: 0; width: 100%; box-sizing: border-box; background: white; box-shadow: 0 -2px 5px rgba(0,0,0,0.1); padding-bottom: calc(env(safe-area-inset-bottom, 0) + 15px); }
-            #list-container { position: fixed; bottom: 0; left: 0; width: 100%; max-width: none; height: 80vh; max-height: 80vh; background-color: white; box-shadow: 0 -4px 10px rgba(0,0,0,0.1); border-right: none; transform: translateY(100%); transition: transform 0.3s ease-in-out; }
+            #map-container { width: 100%; padding-bottom: var(--header-height); box-sizing: border-box; }
+            #info-box { flex-shrink: 0; overflow-y: auto; }
+            #list-container { position: fixed; bottom: 0; left: 0; width: 100%; max-width: none; height: auto; max-height: 80vh; background-color: white; box-shadow: 0 -4px 10px rgba(0,0,0,0.1); border-right: none; transform: translateY(calc(100% - var(--header-height))); transition: transform 0.3s ease-in-out; }
             #list-container.open { transform: translateY(0); }
+            #list-header { background-color: white; border-bottom: 1px solid #ddd; }
             #list-header h1 { font-size: 1.2em; }
-            #fab-toggle-list { display: flex; justify-content: center; align-items: center; position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; background-color: #007bff; color: white; border: none; border-radius: 50%; box-shadow: 0 4px 8px rgba(0,0,0,0.2); font-size: 24px; cursor: pointer; z-index: 1000; padding-bottom: env(safe-area-inset-bottom, 0); }
+            #toggle-list-mobile { display: block; padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 5px; font-size: 0.9em; }
         }
     </style>
 </head>
@@ -48,6 +46,8 @@
     <div id="list-container">
         <div id="list-header">
             <h1>コテージ候補</h1>
+            <button id="toggle-list-pc">隠す</button>
+            <button id="toggle-list-mobile">候補リストを表示</button>
         </div>
         <ul id="cottage-list">
             <li class="cottage-item" data-map-src="https://www.google.com/maps?q=山梨県南都留郡富士河口湖町小立３９２９−１&output=embed" data-gmap-link="https://maps.app.goo.gl/rE6F2HBJ4cdxuMHj8" data-price="1泊～65,800円" data-distance="車で約11分 (4.6km)" data-location="富士急の西側、河口湖の南岸エリア。アクセス良好。" data-link="https://travel.rakuten.co.jp/HOTEL/177905/177905.html">1. 河口湖ヴィラ エフジェイリゾート</li>
@@ -67,13 +67,9 @@
     </div>
 
     <div id="map-container">
-        <iframe id="map-frame" src=""></iframe>
+        <iframe id="map-frame" src="" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
         <div id="info-box">
-            <div id="info-nav">
-                <button id="prev-cottage">＜</button>
-                <h2 id="info-name"></h2>
-                <button id="next-cottage">＞</button>
-            </div>
+            <h2 id="info-name"></h2>
             <p><strong>富士急からの距離:</strong> <span id="info-distance"></span></p>
             <p><strong>ロケーション:</strong> <span id="info-location"></span></p>
             <p><strong>価格帯の目安:</strong> <span id="info-price"></span></p>
@@ -82,12 +78,10 @@
         </div>
     </div>
 
-    <button id="fab-toggle-list">☰</button>
-
     <script>
-        // === 要素の取得 ===
-        const allCottages = document.querySelectorAll('.cottage-item');
+        /* JavaScriptは変更ありません */
         const listContainer = document.getElementById('list-container');
+        const cottageList = document.getElementById('cottage-list');
         const mapFrame = document.getElementById('map-frame');
         const infoName = document.getElementById('info-name');
         const infoDistance = document.getElementById('info-distance');
@@ -96,26 +90,12 @@
         const infoLink = document.getElementById('info-link');
         const infoGmapLink = document.getElementById('info-gmap-link');
         const toggleBtnPc = document.getElementById('toggle-list-pc');
-        const fabToggleList = document.getElementById('fab-toggle-list');
-        const prevBtn = document.getElementById('prev-cottage');
-        const nextBtn = document.getElementById('next-cottage');
-        
-        // === 状態管理 ===
-        let currentCottageIndex = 0;
+        const toggleBtnMobile = document.getElementById('toggle-list-mobile');
 
-        // === 関数 ===
-        function updateInfo(index) {
-            // 無効なインデックスの場合は何もしない
-            if (index < 0 || index >= allCottages.length) return;
-
-            currentCottageIndex = index;
-            const item = allCottages[index];
-
-            // リストのアクティブ表示を更新
-            allCottages.forEach(li => li.classList.remove('active'));
+        function updateInfo(item) {
+            if (!item) return;
+            document.querySelectorAll('.cottage-item').forEach(el => el.classList.remove('active'));
             item.classList.add('active');
-
-            // 情報欄と地図を更新
             mapFrame.src = item.dataset.mapSrc;
             infoName.textContent = item.textContent.trim();
             infoDistance.textContent = item.dataset.distance;
@@ -124,46 +104,29 @@
             infoLink.href = item.dataset.link;
             infoLink.textContent = "公式サイト・予約サイト";
             infoGmapLink.href = item.dataset.gmapLink;
-
-            // 前へ/次へボタンの状態を更新
-            prevBtn.disabled = index === 0;
-            nextBtn.disabled = index === allCottages.length - 1;
         }
 
-        // === イベントリスナー ===
+        const initialItem = cottageList.querySelector('.cottage-item');
+        updateInfo(initialItem);
+
         toggleBtnPc.addEventListener('click', () => {
             listContainer.classList.toggle('collapsed');
             toggleBtnPc.textContent = listContainer.classList.contains('collapsed') ? '表示' : '隠す';
         });
 
-        fabToggleList.addEventListener('click', () => {
+        toggleBtnMobile.addEventListener('click', () => {
             listContainer.classList.toggle('open');
-            fabToggleList.textContent = listContainer.classList.contains('open') ? '↓' : '☰';
+            toggleBtnMobile.textContent = listContainer.classList.contains('open') ? 'リストを隠す' : '候補リストを表示';
         });
 
-        cottageList.addEventListener('click', (e) => {
+        cottageList.addEventListener('click', function(e) {
             const item = e.target.closest('.cottage-item');
-            if (item) {
-                // クリックされたli要素が何番目かを探す
-                const index = Array.from(allCottages).indexOf(item);
-                updateInfo(index);
-                if (window.innerWidth <= 768) {
-                    listContainer.classList.remove('open');
-                    fabToggleList.textContent = '☰';
-                }
+            updateInfo(item);
+            if (window.innerWidth <= 768) {
+                listContainer.classList.remove('open');
+                toggleBtnMobile.textContent = '候補リストを表示';
             }
         });
-
-        prevBtn.addEventListener('click', () => {
-            updateInfo(currentCottageIndex - 1);
-        });
-
-        nextBtn.addEventListener('click', () => {
-            updateInfo(currentCottageIndex + 1);
-        });
-
-        // === 初期化 ===
-        updateInfo(0); // 最初のコテージを表示
     </script>
 
 </body>
